@@ -1,0 +1,14 @@
+[  {
+      "type": "readers.ept",
+      "filename": "/var/data/rws/data/2019/amsterdam_entwined/ept.json",
+      "bounds":"([117895.5,483566.5],[ 117895.6,483566.6])"
+      },
+    {
+        "type":"filters.smrf"
+    },
+    {
+        "type":"writers.las",
+        "filename":"/var/data/arnot/rws/tst.laz",
+        "compression":"lazperf"
+    }
+]
