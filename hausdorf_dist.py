@@ -76,7 +76,6 @@ def filter_distance(reference_cloud, compared_cloud, max_dist = 0.05):
 
     haus_distances = hausdorff_distance(reference_array, 
                                         compared_array)
-
     out_array = rfn.append_fields(compared_cloud[['X','Y','Z','Red','Green','Blue']], 
                                 'Distance', 
                                 haus_distances)
@@ -84,8 +83,6 @@ def filter_distance(reference_cloud, compared_cloud, max_dist = 0.05):
 
     return filtered_out_array
     
-
-
 def main():
     path_a10_2018 = '/var/data/rws/data/2018/entwined/ept.json'
     path_a10_2019 = '/var/data/rws/data/2019/amsterdam_entwined/ept.json'
