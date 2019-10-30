@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <!-- Use correct character set. -->
+   <meta charset="utf-8">
+   <!-- Tell IE to use the latest, best version. -->
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+   <title>Amsterdam 3D Canvas</title>
+   <!-- <script src="./node_modules/cesium/Build/Cesium/Cesium.js"></script> -->
+   <script src="https://cesiumjs.org/releases/1.58/Build/Cesium/Cesium.js"></script>
+   <script src="./node_modules/@tweenjs/tween.js/src/Tween.js"></script>
+   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+   <link rel='stylesheet' href="./style.css"></link>
+   <link href="https://cesiumjs.org/releases/1.58/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+
+
+  <style>
+        @import url(./node_modules/cesium/Build/Cesium/Widgets/widgets.css);
+        html, body, #cesiumContainer {
+          width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+      }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+
+   <script src="./cesiumApp.js"></script>
+</body>
+</html>
