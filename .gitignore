@@ -102,3 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# other
+.code-workspace.code-workspace
+.ipynb_checkpoints/**
