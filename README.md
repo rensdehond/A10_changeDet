@@ -5,6 +5,9 @@ plan:
  - for each of the bgt objects that indicates a portal
 	 - ~~*to do*:  which bgt objecten?~~
 	 - BGT: `bgt.overbruggingsdeel`
+	 - Kerngis: vKunstwerk_FeaturesToJSON >> `lower("OBJECTTEKST" ) = 'viaduct'`
+	 	- When does A10 go under and when does it go over
+	 - test area: `117813.6,487266.1,117942.1,487370.7`
  - filter cars out for visualization and cleaning of data before clustering
  	- *to do*: 2018 < data cleaning
 	- ~~*to do*: 2019~~ < visualization/data cleaning
