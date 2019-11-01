@@ -94,7 +94,7 @@
       "resolved": "https://registry.npmjs.org/atob/-/atob-2.1.2.tgz",
       "version": "2.1.2"
     },
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "balanced-match": {
       "integrity": "sha1-ibTRmasr7kneFk6gK4nORi1xt2c=",
       "resolved": "https://registry.npmjs.org/balanced-match/-/balanced-match-1.0.0.tgz",
