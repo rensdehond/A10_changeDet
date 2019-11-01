@@ -6,7 +6,8 @@ plan:
 	 - ~~*to do*:  which bgt objecten?~~
 	 - BGT: `bgt.overbruggingsdeel`
  - filter cars out for visualization and cleaning of data before clustering
- 
+ 	- *to do*: 2018 < data cleaning
+	- ~~*to do*: 2019~~ < visualization/data cleaning
  - read the points from the ept-folder
 	 - *to do*: create potree tiles
 	 - *to do*: create cesium tiles
