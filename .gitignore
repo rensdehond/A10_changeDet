@@ -106,3 +106,4 @@ venv.bak/
 # other
 *.code-workspace
 .ipynb_checkpoints/**
+node_modules/*
