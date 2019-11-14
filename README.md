@@ -19,12 +19,17 @@ plan:
 	 - *to do*: create cesium tiles
 ## method 1
 	- cluster on Z
-		 - Assumption: the two biggest clusters are the top and bottom of the portal
+		 - Assumption: the two biggest clusters are the top and bottom of the portal	
+	 - CLUSTERS FOUND
+	 - onderste 10 % (ofzo) vinden, ruis eruit halen en vergelijken
+	 - 
 		 
 ## method 2
 	- validate method for calculating doorrijhoogte
 	- calculeate doorrijhoogte for x portals
 	- compare over different years
+
+
 
 ## vragen:
 - Hoe definieren we de doorrijhoogte?
