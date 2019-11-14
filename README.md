@@ -17,8 +17,16 @@ plan:
 	 - available to whom?
 	 - *to do*: create potree tiles
 	 - *to do*: create cesium tiles
- - cluster on Z
-	 - Assumption: the two biggest clusters are the top and bottom of the portal
+## method 1
+	- cluster on Z
+		 - Assumption: the two biggest clusters are the top and bottom of the portal
+		 
+## method 2
+	- validate method for calculating doorrijhoogte
+	- calculeate doorrijhoogte for x portals
+	- compare over different years
+
+
  - compare two clusters statistically
  	 - specify
  - write std, mean, etc to ???
