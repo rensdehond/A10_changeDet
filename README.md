@@ -26,6 +26,10 @@ plan:
 	- calculeate doorrijhoogte for x portals
 	- compare over different years
 
+## vragen:
+- Hoe definieren we de doorrijhoogte?
+- willen we de doorijhoogte of alleen het verschil?
+
 
  - compare two clusters statistically
  	 - specify
