@@ -1,0 +1,18 @@
+{
+  "pipeline":[
+	 {
+      "type":"readers.las",
+	"compression": "laszip"
+    },
+	{
+	  "type":"filters.python",
+	  "script":"./normalize.py",
+	  "function":"cast_type",
+	  "module":"anything"
+	},
+	{
+      "type":"writers.las",
+	"compression": "laszip"
+    }
+  ]
+}
