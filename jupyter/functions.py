@@ -107,7 +107,7 @@ def kmeans_clusters(points,n_clusters = 2):
     return points
 
 
-def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100):
+def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100, max_dist = 0.2):
     
     pyntcloud_pts['uid'] = pyntcloud_pts.index
     ransac_points = pyntcloud_pts.copy()
@@ -134,9 +134,9 @@ def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100):
             inliers, best_model = single_fit(xyz.points.values, 
                                              RansacPlane, 
                                              return_model=True,
-                                             #max_dist=0.2, 
-                                             max_iterations=1000, 
+                                             max_iterations=10000, 
                                              n_inliers_to_stop=None)
+            best_inliers = best_model.get_projections(xyz.points.values)[0] < max_dist
             
             print(best_model.point)
             print(best_model.normal)
@@ -146,16 +146,18 @@ def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100):
                 ## the inliers are not correctly classified, 
                 ## probably because max dist is not a argument for single_fit. 
                 ## figure this out! 
+                # distances to plane = best_model.get_projections(xyz.points.values)
 
             # create frame of uid and plane
             ransacplane = pd.DataFrame({
                 'uid':ransac_points.uid,  
-                'plane': inliers.astype(np.int)
+                'plane': best_inliers.astype(np.int)
             })
             
             # Copy the non-planes
-            outliers = np.invert(inliers)
+            outliers = best_model.get_projections(xyz.points.values)[0] >= max_dist
             ransacrest = ransac_points[outliers]
+            print(np.unique(outliers, return_counts=True))
             
             # if oints_with_planes exists, merge the existing planes with the new found plane
             if points_with_planes is not None:
