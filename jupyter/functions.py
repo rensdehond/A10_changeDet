@@ -15,6 +15,8 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 from pyntcloud import PyntCloud
 from sklearn.cluster import DBSCAN, KMeans
 
+from pyntcloud.ransac.fitters import single_fit
+from pyntcloud.ransac.models import RansacPlane
 
 def get_points(ept_path, bounds, wkt):
     
@@ -103,3 +105,82 @@ def kmeans_clusters(points,n_clusters = 2):
     # points["coresample"]= core_samples
     points["cluster"] = kmean_clus.labels_
     return points
+
+
+def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100):
+    
+    pyntcloud_pts['uid'] = pyntcloud_pts.index
+    ransac_points = pyntcloud_pts.copy()
+    points_with_planes = None
+    
+    for i in range(n_planes):
+        if len(pyntcloud_pts.index) < min_pts:
+            print(f'found {i + 1} planes')
+            break
+            
+        else:
+            # fit a plane
+            # ransac_points.add_scalar_field("plane_fit",
+            #                 max_dist=0.2, 
+            #                max_iterations=1000, 
+            #                n_inliers_to_stop=None)
+            
+            xyz = PyntCloud(pd.DataFrame({
+                'x':ransac_points.x,
+                'y':ransac_points.y,
+                'z':ransac_points.z
+                   }))
+            
+            inliers, best_model = single_fit(xyz.points.values, 
+                                             RansacPlane, 
+                                             return_model=True,
+                                             #max_dist=0.2, 
+                                             max_iterations=1000, 
+                                             n_inliers_to_stop=None)
+            
+            print(best_model.point)
+            print(best_model.normal)
+            
+
+                ## TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+                ## the inliers are not correctly classified, 
+                ## probably because max dist is not a argument for single_fit. 
+                ## figure this out! 
+
+            # create frame of uid and plane
+            ransacplane = pd.DataFrame({
+                'uid':ransac_points.uid,  
+                'plane': inliers.astype(np.int)
+            })
+            
+            # Copy the non-planes
+            outliers = np.invert(inliers)
+            ransacrest = ransac_points[outliers]
+            
+            # if oints_with_planes exists, merge the existing planes with the new found plane
+            if points_with_planes is not None:
+                points_with_planes = pd.merge(  points_with_planes, 
+                                                ransacplane, 
+                                                on='uid',
+                                                how='left')
+            
+            # If it does not exists, merge the initial pointcloud with found ransacplane
+            else:
+                points_with_planes = pd.merge(  pyntcloud_pts, 
+                                                ransacplane, 
+                                                on='uid',
+                                                how='left')
+            # if there is no column with cid, create a new one and give it all the value 10
+            if i == 0:
+                points_with_planes['cid'] = 10
+            
+            # at the 
+            # points_with_planes['cid'] = points_with_planes.plane.where(points_with_planes['plane'] == 1, i+1)
+            points_with_planes['cid'] = np.where(points_with_planes['plane'] == 1, i+1, points_with_planes['cid'])
+            points_with_planes = points_with_planes.drop(['plane'], axis=1)
+
+            ransac_points = ransacrest.copy()
+            
+    return points_with_planes
+
+
