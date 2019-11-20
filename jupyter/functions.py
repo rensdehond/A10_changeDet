@@ -218,7 +218,7 @@ def get_relevant_cids(planes):
     return [ cids[order[0]], cids[order[1]] ]
 
 
-def find_z(x, y, point, normal):
+def find_z(point, normal, x, y):
     '''
     https://math.stackexchange.com/questions/28043/finding-the-z-value-on-a-plane-with-x-y-values
     
@@ -227,7 +227,7 @@ def find_z(x, y, point, normal):
         
     '''
     
-    
-    z = (np.dot(normal, point) - normal[2] * x - normal[1] * y) / normal[2]
+    z = (np.dot(normal, point) - normal[0] * x - normal[1] * y) / normal[2]
+
     
     return z
