@@ -115,6 +115,7 @@ def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100, max_dist = 0.2,
     pyntcloud_pts['uid'] = pyntcloud_pts.index
     ransac_points = pyntcloud_pts.copy()
     points_with_planes = pyntcloud_pts.copy()
+    best_models = {}
     
     for i in range(n_planes):
         if len(pyntcloud_pts.index) < min_pts:
@@ -122,8 +123,10 @@ def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100, max_dist = 0.2,
             break
             
         else:
-            best_models = {}
+            
+            
             cid = i+1
+            print(f'clustering cluster {cid}')
 
             xyz = PyntCloud(pd.DataFrame({
                 'x':ransac_points.x,
@@ -137,7 +140,7 @@ def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100, max_dist = 0.2,
                                              max_iterations=max_iterations, 
                                              n_inliers_to_stop=None)
 
-            best_models[cid] = [best_model]
+            best_models[cid] = best_model
             best_inliers = best_model.get_projections(xyz.points.values)[0] < max_dist
             
             # create frame of uid and plane
@@ -213,3 +216,18 @@ def get_relevant_cids(planes):
     order.reverse()
 
     return [ cids[order[0]], cids[order[1]] ]
+
+
+def find_z(x, y, point, normal):
+    '''
+    https://math.stackexchange.com/questions/28043/finding-the-z-value-on-a-plane-with-x-y-values
+    
+    Follows function:
+        z = (r * a + s * b + t * c − r * x − s * y) / t
+        
+    '''
+    
+    
+    z = (np.dot(normal, point) - normal[2] * x - normal[1] * y) / normal[2]
+    
+    return z
