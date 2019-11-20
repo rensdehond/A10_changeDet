@@ -18,6 +18,9 @@ from sklearn.cluster import DBSCAN, KMeans
 from pyntcloud.ransac.fitters import single_fit
 from pyntcloud.ransac.models import RansacPlane
 
+from scipy.spatial import cKDTree
+
+
 def get_points(ept_path, bounds, wkt):
     
     READ_PIPELINE = """
@@ -107,11 +110,11 @@ def kmeans_clusters(points,n_clusters = 2):
     return points
 
 
-def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100, max_dist = 0.2):
+def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100, max_dist = 0.2, max_iterations = 200):
     
     pyntcloud_pts['uid'] = pyntcloud_pts.index
     ransac_points = pyntcloud_pts.copy()
-    points_with_planes = None
+    points_with_planes = pyntcloud_pts.copy()
     
     for i in range(n_planes):
         if len(pyntcloud_pts.index) < min_pts:
@@ -119,12 +122,9 @@ def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100, max_dist = 0.2)
             break
             
         else:
-            # fit a plane
-            # ransac_points.add_scalar_field("plane_fit",
-            #                 max_dist=0.2, 
-            #                max_iterations=1000, 
-            #                n_inliers_to_stop=None)
-            
+            best_models = {}
+            cid = i+1
+
             xyz = PyntCloud(pd.DataFrame({
                 'x':ransac_points.x,
                 'y':ransac_points.y,
@@ -134,55 +134,82 @@ def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100, max_dist = 0.2)
             inliers, best_model = single_fit(xyz.points.values, 
                                              RansacPlane, 
                                              return_model=True,
-                                             max_iterations=10000, 
+                                             max_iterations=max_iterations, 
                                              n_inliers_to_stop=None)
+
+            best_models[cid] = [best_model]
             best_inliers = best_model.get_projections(xyz.points.values)[0] < max_dist
             
-            print(best_model.point)
-            print(best_model.normal)
-            
-
-                ## TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-                ## the inliers are not correctly classified, 
-                ## probably because max dist is not a argument for single_fit. 
-                ## figure this out! 
-                # distances to plane = best_model.get_projections(xyz.points.values)
-
             # create frame of uid and plane
             ransacplane = pd.DataFrame({
-                'uid':ransac_points.uid,  
-                'plane': best_inliers.astype(np.int)
-            })
+                    'uid':ransac_points.uid,  
+                    'plane': best_inliers.astype(np.int)
+                })
             
-            # Copy the non-planes
-            outliers = best_model.get_projections(xyz.points.values)[0] >= max_dist
-            ransacrest = ransac_points[outliers]
-            print(np.unique(outliers, return_counts=True))
+            # find the non-planes
+            outliers_bools = best_model.get_projections(xyz.points.values)[0] >= max_dist
+            outliers = ransac_points[outliers_bools]
             
-            # if oints_with_planes exists, merge the existing planes with the new found plane
-            if points_with_planes is not None:
-                points_with_planes = pd.merge(  points_with_planes, 
-                                                ransacplane, 
-                                                on='uid',
-                                                how='left')
-            
-            # If it does not exists, merge the initial pointcloud with found ransacplane
-            else:
-                points_with_planes = pd.merge(  pyntcloud_pts, 
-                                                ransacplane, 
-                                                on='uid',
-                                                how='left')
-            # if there is no column with cid, create a new one and give it all the value 10
+            # merge the existing planes with the new found plane
+        
+            points_with_planes = pd.merge(points_with_planes, 
+                                          ransacplane, 
+                                          on='uid',
+                                          how='left')
+
             if i == 0:
-                points_with_planes['cid'] = 10
+                points_with_planes['cid'] = 20
             
-            # at the 
-            # points_with_planes['cid'] = points_with_planes.plane.where(points_with_planes['plane'] == 1, i+1)
-            points_with_planes['cid'] = np.where(points_with_planes['plane'] == 1, i+1, points_with_planes['cid'])
+            # Give the points in the plane a cluster id. 
+            points_with_planes['cid'] = np.where(points_with_planes['plane'] == 1, 
+                                                 cid, 
+                                                 points_with_planes['cid']
+                                                )
+            
             points_with_planes = points_with_planes.drop(['plane'], axis=1)
 
-            ransac_points = ransacrest.copy()
+            ransac_points = outliers.copy()
             
-    return points_with_planes
+    return points_with_planes, best_models
+
+def filter_distance(reference_cloud, compared_cloud, max_dist = 0.05):
+    reference_array = np.array(reference_cloud[['X', 'Y', 'Z']].tolist())
+    compared_array = np.array(compared_cloud[['X', 'Y', 'Z']].tolist())
+
+    haus_distances = hausdorff_distance(reference_array, 
+                                        compared_array)
+    out_array = rfn.append_fields(compared_cloud[['X','Y','Z','Red','Green','Blue']], 
+                                'Distance', 
+                                haus_distances)
+    filtered_out_array = out_array[out_array['Distance'] < max_dist]
+
+    return filtered_out_array
+
+def hausdorff_distance(reference_cloud, compared_cloud):
+    """
+
+    Parameters
+    ----------
+    reference_cloud : (Mx3) array
+        The X, Y, Z coordinates of points in the reference cloud
+    compared_cloud : (Mx3) array
+        The X, Y, Z coordinates of points in the compared cloud
+    """
+    tree = cKDTree(reference_cloud)
+    distances, _ = tree.query(compared_cloud, k=1)
+    return distances
 
 
+
+def get_relevant_cids(planes):
+    cids, count = np.unique(planes['cid'], return_counts=True)
+    
+    # last one is the 'rest' cid
+    cids = cids[:-1]
+    counts = count[:-1]
+    
+    # get the order of largest to smallest  cluster
+    order = sorted(range(len(counts)), key=lambda k: counts[k])
+    order.reverse()
+
+    return [ cids[order[0]], cids[order[1]] ]
