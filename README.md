@@ -40,3 +40,8 @@ plan:
  	 - specify
  - write std, mean, etc to ???
 	- 
+	
+## ideen 
+ - Snij-lijn onderste twee trusvlakken  (soort van diagonale vlakken)
+ 	- kan bepalen hoe schijn hij is in type 1 (trus horizontaal of niet)
+	
