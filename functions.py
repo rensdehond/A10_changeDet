@@ -123,10 +123,8 @@ def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100, max_dist = 0.2,
             break
             
         else:
-            
-            
+
             cid = i+1
-            print(f'clustering cluster {cid}')
 
             xyz = PyntCloud(pd.DataFrame({
                 'x':ransac_points.x,
@@ -138,7 +136,7 @@ def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100, max_dist = 0.2,
                                              RansacPlane, 
                                              return_model=True,
                                              max_iterations=max_iterations, 
-                                             n_inliers_to_stop=None)
+                                             n_inliers_to_stop=100000)
 
             best_models[cid] = best_model
             best_inliers = best_model.get_projections(xyz.points.values)[0] < max_dist
@@ -172,6 +170,8 @@ def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100, max_dist = 0.2,
             points_with_planes = points_with_planes.drop(['plane'], axis=1)
 
             ransac_points = outliers.copy()
+            n_pnts = len(ransacplane.uid)
+            print(f'clustered cluster {cid}; found {n_pnts} points')
             
     return points_with_planes, best_models
 
@@ -248,3 +248,10 @@ def calc_iterations(n_points, prob_all_inliers = 0.99):
 
 
     return iterations
+
+def find_hausdorf_dist():
+    avg_dist = 0
+    std_dist = 0
+    return avg_dist, std_dist
+
+def 

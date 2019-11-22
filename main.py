@@ -55,14 +55,24 @@ def main_distances(wkt):
                 models[rel_cids[1]], 
                 shapely.wkt.loads(wkt))
 
+        # z results
         results[f'z_{year}'] = z
         results[f'model_{year}_{rel_cids[0]}'] = models[rel_cids[0]]
         results[f'model_{year}_{rel_cids[1]}'] = models[rel_cids[1]]
+
+        # model results, plane 1
+        results[f'point_{rel_cids[0]}'] = models[rel_cids[0]].point
+        results[f'normal_{rel_cids[0]}'] = models[rel_cids[0]].normal
+        
+        # model results, plane 2
+        results[f'point_{rel_cids[1]}'] = models[rel_cids[1]].point
+        results[f'normal_{rel_cids[1]}'] = models[rel_cids[1]].normal
+
             
 
-    z_diff = results['z_2018'] - results['z_2019']
+    results['z_diff'] = results['z_2018'] - results['z_2019']
 
-    return results['z_2018'], results['z_2019'], z_diff
+    return results
 
 def main():
 
@@ -76,15 +86,17 @@ def main():
         wkt = dictionary['wkt']
 
         print(f'clustering id: \t {wkt_id}')
-        z18, z19, dz = main_distances(wkt)
+        results = main_distances(wkt)
 
-        insert_query = f'INSERT INTO VU.bruggen_results VALUES ({wkt_id}, {z18}, {z19}, {dz}, ST_GeomFromText(\'{wkt}\'))'
-        
+        values = ', '.join(str(results[key]) for key in results.keys())
+
+        insert_query = f'INSERT INTO pc_poc.bruggen_results_point_normal VALUES ({values}, ST_GeomFromText(\'{wkt}\'))'
+        leda.execute_query(insert_query)
 
 
 if __name__ == '__main__':
 
-    N_PLANES = 5
+    N_PLANES = 3
     MIN_PTS = 10000
     MAX_DIST = 0.1
     MAX_ITERATIONS = 5000
