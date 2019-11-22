@@ -231,3 +231,12 @@ def find_z(point, normal, x, y):
 
     
     return z
+
+def find_distances_centroid(model1, model2, polygon):
+    centroid = polygon.centroid
+    z1 = find_z(model1.point, model1.normal, centroid.x, centroid.y)
+    z2 = find_z(model2.point, model2.normal, centroid.x, centroid.y)
+
+    distance = z2 - z1
+
+    return distance
