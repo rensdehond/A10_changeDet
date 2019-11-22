@@ -240,3 +240,11 @@ def find_distances_centroid(model1, model2, polygon):
     distance = z2 - z1
 
     return distance
+
+def calc_iterations(n_points, prob_all_inliers = 0.99):
+    
+    enumerator = math.log(1 - prob_all_inliers)
+    divider = math.log(1 - 0)
+
+
+    return iterations
