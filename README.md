@@ -1,10 +1,13 @@
-## Project title
-A little info about your project and/ or overview that explains **what** the project is about.
+## Detect drive through hights in hing resolution point clouds
+This repository contains the method for the detation of differences 'drive through height'. 
 
-## Installation
-Provide step by step series of examples and explanations about how to get a development env running.
+## Set up
+`conda env create -f vu-pointclouds.yml`
 
 ## How to use?
-If people like your project they’ll want to learn how they can use it. To do so include step by step guide to use your project.
+
+## The initial plan
+[see the very rough plan](plan.md)
 
 ## License
+[MIT License](LICENSE)
