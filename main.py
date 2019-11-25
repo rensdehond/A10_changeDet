@@ -73,6 +73,7 @@ def main_distances(wkt):
 
 def main():
 
+    # database connection and query
     leda = Database('VU')
     query = 'SELECT id, ST_AsText(geom) wkt FROM pc_poc.bruggen'
     result = leda.execute_query(query)[0]
