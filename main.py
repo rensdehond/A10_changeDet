@@ -5,15 +5,12 @@ import pandas as pd
 from numpy.lib import recfunctions as rfn
 from db_class import Database
 
-
 def main_distances(wkt):
 
     paths = {   
-        '2018':'/var/data/rws/data/2018/entwined/ept.json', 
-        '2019':'/var/data/rws/data/2019/amsterdam_entwined/ept.json'
+        '2018': '/var/data/rws/data/2018/entwined/ept.json', 
+        '2019': '/var/data/rws/data/2019/amsterdam_entwined/ept.json'
         }
-
-
 
     xmin,ymin,xmax,ymax = shapely.wkt.loads(wkt).bounds
     bounds = f'([{xmin}, {xmax}], [{ymin}, {ymax}])'

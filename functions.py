@@ -13,7 +13,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 from pyntcloud import PyntCloud
-from sklearn.cluster import DBSCAN, KMeans
+from sklearn.cluster import DBSCAN
 
 from pyntcloud.ransac.fitters import single_fit
 from pyntcloud.ransac.models import RansacPlane
@@ -94,19 +94,6 @@ def find_clusters(points, eps, min_samples):
     core_samples[dbsc.core_sample_indices_] = True
     points["coresample"]= core_samples
     points["cluster"] = dbsc.labels_
-    return points
-
-
-
-def kmeans_clusters(points,n_clusters = 2):
-    df = points[["x", "y","z"]]
-    kmean = KMeans(n_clusters=n_clusters)
-    kmean_clus = kmean.fit(df)
-    labels = kmean_clus.labels_
-    # core_samples = np.zeros_like(labels, dtype = bool)
-    # core_samples[kmean_clus.core_sample_indices_] = True
-    # points["coresample"]= core_samples
-    points["cluster"] = kmean_clus.labels_
     return points
 
 
@@ -253,5 +240,3 @@ def find_hausdorf_dist():
     avg_dist = 0
     std_dist = 0
     return avg_dist, std_dist
-
-def 
