@@ -98,7 +98,9 @@ def find_clusters(points, eps, min_samples):
 
 
 def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100, max_dist = 0.2, max_iterations = 200):
-    
+    '''
+    :TODO
+    '''
     pyntcloud_pts['uid'] = pyntcloud_pts.index
     ransac_points = pyntcloud_pts.copy()
     points_with_planes = pyntcloud_pts.copy()
@@ -106,11 +108,10 @@ def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100, max_dist = 0.2,
     
     for i in range(n_planes):
         if len(pyntcloud_pts.index) < min_pts:
-            print(f'found {i + 1} planes')
+            print(f'found {i} planes')
             break
             
         else:
-
             cid = i+1
 
             xyz = PyntCloud(pd.DataFrame({
@@ -121,7 +122,7 @@ def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100, max_dist = 0.2,
             
             inliers, best_model = single_fit(xyz.points.values, 
                                              RansacPlane, 
-                                             return_model=True,
+                                             return_model=True, 
                                              max_iterations=max_iterations, 
                                              n_inliers_to_stop=100000)
 
@@ -130,7 +131,7 @@ def recursive_planes(pyntcloud_pts, n_planes = 2, min_pts = 100, max_dist = 0.2,
             
             # create frame of uid and plane
             ransacplane = pd.DataFrame({
-                    'uid':ransac_points.uid,  
+                    'uid':ransac_points.uid,  # :TODO check if the right UID's are selected
                     'plane': best_inliers.astype(np.int)
                 })
             

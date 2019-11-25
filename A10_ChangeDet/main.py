@@ -1,4 +1,4 @@
-from functions import get_points, filter_distance, recursive_planes, get_relevant_cids, find_distances_centroid
+from functions import get_points, filter_distance, recursive_planes, get_relevant_cids, find_distances_centroid, write_to_laz
 import shapely.wkt
 import numpy as np
 import pandas as pd
@@ -19,21 +19,21 @@ def main_distances(wkt):
     print(f'loaded pc 2018')
     pc19 = get_points(paths['2019'], bounds, wkt)
     print(f'loaded pc 2019')
-
-    filtered_2018 = filter_distance(pc18, pc19)
-    filtered_2019 = filter_distance(pc19, pc18)
+    
+    # pre processing (filtering of everything that moved more than  5 cm)
+    filtered_2018 = filter_distance(pc18, pc19, 0.05)
+    filtered_2019 = filter_distance(pc19, pc18, 0.05)
     print('filtered pcs')
 
     pcs = {
         '2018': filtered_2018,
-        '2019':filtered_2019
+        '2019': filtered_2019
         }
 
     results = {}
 
     for year in ('2018', '2019'):
-        points = pd.DataFrame(
-        np.array(
+        points = pd.DataFrame( np.array(
             pcs[year][['X','Y','Z','Red','Green','Blue']].tolist()), 
             columns=['x', 'y', 'z','red','green','blue'])
 
@@ -57,15 +57,14 @@ def main_distances(wkt):
         results[f'model_{year}_{rel_cids[0]}'] = models[rel_cids[0]]
         results[f'model_{year}_{rel_cids[1]}'] = models[rel_cids[1]]
 
+        # :TODO redundant, and overwrites for each year
         # model results, plane 1
         results[f'point_{rel_cids[0]}'] = models[rel_cids[0]].point
         results[f'normal_{rel_cids[0]}'] = models[rel_cids[0]].normal
         
         # model results, plane 2
         results[f'point_{rel_cids[1]}'] = models[rel_cids[1]].point
-        results[f'normal_{rel_cids[1]}'] = models[rel_cids[1]].normal
-
-            
+        results[f'normal_{rel_cids[1]}'] = models[rel_cids[1]].normal   
 
     results['z_diff'] = results['z_2018'] - results['z_2019']
 
@@ -84,10 +83,9 @@ def main():
         wkt = dictionary['wkt']
 
         print(f'clustering id: \t {wkt_id}')
-        results = main_distances(wkt)
+        results = main_distances(wkt) #:TODO main_distances(wkt, write_laz)
 
         values = ', '.join(str(results[key]) for key in results.keys())
-
         insert_query = f'INSERT INTO pc_poc.bruggen_results_point_normal VALUES ({values}, ST_GeomFromText(\'{wkt}\'))'
         leda.execute_query(insert_query)
 

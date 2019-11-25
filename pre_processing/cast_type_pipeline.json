@@ -6,7 +6,7 @@
     },
 	{
 	  "type":"filters.python",
-	  "script":"./normalize.py",
+	  "script":"./cast_type.py",
 	  "function":"cast_type",
 	  "module":"anything"
 	},
