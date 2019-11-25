@@ -6,5 +6,8 @@ This repository contains the method for the detation of differences 'drive throu
 
 ## How to use?
 
+## The initial plan
+[see the very rough plan](plan.md)
+
 ## License
 [MIT License](LICENSE)
