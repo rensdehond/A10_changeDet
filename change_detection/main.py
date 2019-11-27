@@ -2,16 +2,20 @@ import numpy as np
 import pandas as pd
 import shapely.wkt
 from numpy.lib import recfunctions as rfn
+import os 
+from pathlib import Path
 
 from db_class import Database
 from functions import (filter_distance, find_distances_centroid,
                        find_distances_pcs, get_points, get_relevant_cids,
-                       recursive_planes, write_to_laz, prepare_sql_string)
+                       recursive_planes, write_to_laz, prepare_sql_string,
+                       write_to_laz)
 
 
-def main_distances(wkt, method = 'ransac'):
+def main_distances(wkt, method = 'ransac', laz_dir = None):
 
     assert method in ('ransac', 'pointcloud'), f'method is not ransac or pointcloud but "{method}".'
+    assert isinstance(laz_dir, str), f'write_laz should be a string of the output directory but is {laz_dir}'
 
     paths = {
         '2018': '/var/data/rws/data/2018/entwined/ept.json',
@@ -55,6 +59,23 @@ def main_distances(wkt, method = 'ransac'):
         planes[year] = planes_year
         rel_cids = get_relevant_cids(planes[year])
 
+        if laz_dir != None:
+            laz_path = Path(laz_dir)
+            if not laz_path.parent.exists:
+                print('The output path specified for output laz files is incorrect.')
+
+            laz_path.mkdir(parents=False, exist_ok=True)
+            laz_fn = f'{year}'
+
+            laz_array = rfn.append_fields(pcs[year][['X','Y','Z','Red','Green','Blue']],
+                                          'Classification',
+                                          planes[year]['cid'].astype(np.uint16),
+                                          usemask=False,
+                                         )
+        
+            write_to_laz(laz_array, laz_path.joinpath(f'{year}.laz'))
+            print(f'wrote to {laz_dir}/{year}.laz"')
+
         results[f'model_{year}_{rel_cids[0]}'] = models_year[rel_cids[0]]
         results[f'model_{year}_{rel_cids[1]}'] = models_year[rel_cids[1]]
 
@@ -71,13 +92,8 @@ def main_distances(wkt, method = 'ransac'):
         if method == 'pointcloud':
             z = find_distances_pcs(planes[year], rel_cids, PERCENTAGE)
             results[f'z_{year}'] = z
-
     
     results['z_diff'] = results['z_2018'] - results['z_2019']
-    
-
-
-
     return results
 
 
@@ -94,8 +110,7 @@ def main():
         wkt = dictionary['wkt']
 
         print(f'clustering id: \t {wkt_id}')
-        # :TODO main_distances(wkt, write_laz = True)
-        results = main_distances(wkt, 'pointcloud')
+        results = main_distances(wkt, 'pointcloud', laz_dir = f'/var/data/rws/data/output/bruggen_out/{wkt_id}')
 
         values_list =  [
             results['model_2018_1'].point,
@@ -112,11 +127,9 @@ def main():
         ]
 
         value_string = prepare_sql_string(values_list)
-        print('vs:', value_string)
 
         insert_query = f'INSERT INTO pc_poc.results_pointcloud \
             VALUES ({wkt_id}, {value_string}, ST_GeomFromText(\'{wkt}\'))'
-        # insert_query = f'INSERT INTO pc_poc.bruggen_results_point_normal VALUES ({values}, ST_GeomFromText(\'{wkt}\'))'
         leda.execute_query(insert_query)
 
 
