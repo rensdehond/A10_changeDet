@@ -1,9 +1,12 @@
-from functions import get_points, filter_distance, recursive_planes, get_relevant_cids, find_distances_centroid, write_to_laz, find_distances_pcs
-import shapely.wkt
 import numpy as np
 import pandas as pd
+import shapely.wkt
 from numpy.lib import recfunctions as rfn
+
 from db_class import Database
+from functions import (filter_distance, find_distances_centroid,
+                       find_distances_pcs, get_points, get_relevant_cids,
+                       recursive_planes, write_to_laz, prepare_sql_string)
 
 
 def main_distances(wkt, method = 'ransac'):
@@ -50,7 +53,7 @@ def main_distances(wkt, method = 'ransac'):
         )
 
         planes[year] = planes_year
-        rel_cids = get_relevant_cids(planes)
+        rel_cids = get_relevant_cids(planes[year])
 
         results[f'model_{year}_{rel_cids[0]}'] = models_year[rel_cids[0]]
         results[f'model_{year}_{rel_cids[1]}'] = models_year[rel_cids[1]]
@@ -66,7 +69,7 @@ def main_distances(wkt, method = 'ransac'):
             results[f'z_{year}'] = z
 
         if method == 'pointcloud':
-            z = find_distances_pcs(planes, rel_cids, PERCENTAGE)
+            z = find_distances_pcs(planes[year], rel_cids, PERCENTAGE)
             results[f'z_{year}'] = z
 
     
@@ -94,9 +97,25 @@ def main():
         # :TODO main_distances(wkt, write_laz = True)
         results = main_distances(wkt, 'pointcloud')
 
-        print( ', '.join(str(key) for key in results.keys()))
-        values = ', '.join(str(results[key]) for key in results.keys())
-        insert_query = f'INSERT INTO pc_poc.bruggen_results_point_normal VALUES ({values}, ST_GeomFromText(\'{wkt}\'))'
+        values_list =  [
+            results['model_2018_1'].point,
+            results['model_2018_1'].normal,
+            results['model_2018_2'].point,
+            results['model_2018_2'].normal,
+            results['z_2018'],
+            results['model_2019_1'].point,
+            results['model_2019_1'].normal,
+            results['model_2019_2'].point,
+            results['model_2019_2'].normal,
+            results['z_2019'],
+            results['z_diff']
+        ]
+
+        value_string = prepare_sql_string(values_list)
+        print('vs:', value_string)
+
+        insert_query = f'INSERT INTO pc_poc.results_pointcloud \
+            VALUES ({wkt_id}, {value_string}, ST_GeomFromText(\'{wkt}\'))'
         # insert_query = f'INSERT INTO pc_poc.bruggen_results_point_normal VALUES ({values}, ST_GeomFromText(\'{wkt}\'))'
         leda.execute_query(insert_query)
 
@@ -105,7 +124,7 @@ if __name__ == '__main__':
 
     # Ransac parameters
     N_PLANES = 3
-    MIN_PTS = 10000
+    MIN_PTS = 100
     MAX_DIST = 0.1
     MAX_ITERATIONS = 5000
 

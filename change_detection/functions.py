@@ -103,8 +103,8 @@ def recursive_planes(pyntcloud_pts, n_planes=2, min_pts=100, max_dist=0.2, max_i
     best_models = {}
 
     for i in range(n_planes):
-        if len(pyntcloud_pts.index) < min_pts:
-            print(f'found {i} planes')
+        if len(ransac_points.index) < min_pts:
+            print(f'found {i} planes, resulting {pyntcloud_pts.index} points')
             break
 
         else:
@@ -133,8 +133,7 @@ def recursive_planes(pyntcloud_pts, n_planes=2, min_pts=100, max_dist=0.2, max_i
             })
 
             # find the non-planes
-            outliers_bools = best_model.get_projections(xyz.points.values)[
-                0] >= max_dist
+            outliers_bools = best_model.get_projections(xyz.points.values)[0] >= max_dist
             outliers = ransac_points[outliers_bools]
 
             # merge the existing planes with the new found plane
@@ -197,11 +196,12 @@ def get_relevant_cids(planes):
     Returns 2 cluster ids in the order of the heighest (so top part) first.
     '''
 
-    cids, count = np.unique(planes['cid'], return_counts=True)
+    cids, counts = np.unique(planes['cid'], return_counts=True)
 
     # last one is the 'rest' cid
-    cids = cids[:-1]
-    counts = count[:-1]
+    if len(cids) > 2:
+        cids = cids[:-1]
+        counts = counts[:-1]
 
     # get the order of largest to smallest  cluster
     order = sorted(range(len(counts)), key=lambda k: counts[k])
@@ -256,7 +256,9 @@ def find_distances_pcs(planes, relevant_ids, fraction = 0.05):
 
 
 def calc_iterations(n_points, prob_all_inliers=0.99):
-
+    '''
+    work in progress
+    '''
     enumerator = math.log(1 - prob_all_inliers)
     divider = math.log(1 - 0)
 
@@ -267,3 +269,18 @@ def find_hausdorf_dist():
     avg_dist = 0
     std_dist = 0
     return avg_dist, std_dist
+
+
+def prepare_sql_string(values_list):
+    new_values_list = []
+
+    for i, value in enumerate(values_list):
+        if type(value) == np.ndarray:
+
+            string_value = "'{%s, %s, %s}'" % tuple(value)
+            new_values_list += [string_value]
+        else:
+            new_values_list += [ value ]
+    values = ', '.join(str(value) for value in new_values_list)
+
+    return values
