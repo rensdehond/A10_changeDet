@@ -16,11 +16,11 @@ class Database:
     def __init__(self, db,  host='', dbname='', user='', password='', port=5432):
         self.database_name = db
 
-        if db.lower() in ('metis', 'etl_02', 'etl_03', 'vu', 'localhost'):
+        if db.lower() in ('metis', 'etl_02', 'etl_03', 'localhost'):
             eval('self.connect_{}()'.format(db.lower()))
            
         else:
-            assert '' not in (host, database_name, user, password, port), 'no default database and empty argument found.'
+            assert '' not in (host, self.database_name, user, password, port), 'no default database and empty argument found.'
             self.connect(host,dbname,user,password,port)
 
 

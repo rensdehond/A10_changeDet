@@ -138,7 +138,7 @@ def main():
         wkt = dictionary['wkt']
 
         print(f'clustering id: \t {wkt_id}')
-        results = main_distances(wkt, 'pointcloud', laz_dir = config['output_pat'] + f'{wkt_id}')
+        results = main_distances(wkt, 'pointcloud', laz_dir = config['output_path'] + f'{wkt_id}')
 
         values_list =  [
             results['model_2018_1'].point,
