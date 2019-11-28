@@ -99,6 +99,7 @@ dependencies:
   - vs2015_runtime=14.16.27012=hf0eaf9b_0
   - wheel=0.33.6=py37_0
   - wincertstore=0.2=py37_0
+  - yaml=0.1.7=hc54c509_2
   - zlib=1.2.11=h62dcd97_3
   - pip:
     - pandas==0.25.3
