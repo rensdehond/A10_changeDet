@@ -111,3 +111,5 @@ jupyter/*.html
 jupyter/*.ply
 jupyter/*.json
 jupyter/*/ 
+
+config.yaml
