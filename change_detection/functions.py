@@ -143,7 +143,7 @@ def recursive_planes(pyntcloud_pts, n_planes=2, min_pts=100, max_dist=0.2, max_i
 
     for i in range(n_planes):
         if len(ransac_points.index) < min_pts:
-            print(f'found {i} planes, resulting {pyntcloud_pts.index} points')
+            print(f'found {i} planes, resulting {len(pyntcloud_pts.index)} points')
             break
 
         else:

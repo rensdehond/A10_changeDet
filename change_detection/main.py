@@ -4,6 +4,7 @@ import shapely.wkt
 from numpy.lib import recfunctions as rfn
 import os 
 from pathlib import Path
+import yaml
 
 from db_class import Database
 from functions import (filter_distance, find_distances_centroid,
@@ -13,13 +14,30 @@ from functions import (filter_distance, find_distances_centroid,
 
 
 def main_distances(wkt, method = 'ransac', laz_dir = None):
+    '''
+    Function that calculates the difference in height between the top and bottom
+    of a bridge over a road between two years. 
+
+    in:
+        wkt [string]: 
+            Text representation of a polygon. The polygon lies on the A10 and 
+            there are points in this polygon in the paths.
+        
+        method [string]:
+            Must be ransac or pointcloud. Specifies the method which is used to 
+            calculate the difference in height.
+        
+        laz_dir [string or None]: 
+            If it's a string it has to be a Path to a output directory for the laz files.
+            If it's None, no output laz file is generated.
+    '''
 
     assert method in ('ransac', 'pointcloud'), f'method is not ransac or pointcloud but "{method}".'
     assert isinstance(laz_dir, str), f'write_laz should be a string of the output directory but is {laz_dir}'
 
     paths = {
-        '2018': '/var/data/rws/data/2018/entwined/ept.json',
-        '2019': '/var/data/rws/data/2019/amsterdam_entwined/ept.json'
+        '2018': config['path_2019'],
+        '2019': config['path_2018']
     }
 
     xmin, ymin, xmax, ymax = shapely.wkt.loads(wkt).bounds
@@ -98,19 +116,29 @@ def main_distances(wkt, method = 'ransac', laz_dir = None):
 
 
 def main():
+    schema = config['schema']
+    table = config['table']
+    out_table = config['out_table']
 
     # database connection and query
-    leda = Database('VU')
-    query = 'SELECT id, ST_AsText(geom) wkt FROM pc_poc.bruggen where id = 17'
+    leda = Database(
+            'VU',  
+            host=config['host'], 
+            dbname=config['dbname'], 
+            user=config['user'], 
+            password=config['password'], 
+            port=config['port']
+        )
+
+    query = f'SELECT id, ST_AsText(geom) wkt FROM {schema}.{table} where id in (1,2,3,4)'
     result = leda.execute_query(query)[0]
 
     for dictionary in result:
-
         wkt_id = dictionary['id']
         wkt = dictionary['wkt']
 
         print(f'clustering id: \t {wkt_id}')
-        results = main_distances(wkt, 'pointcloud', laz_dir = f'/var/data/rws/data/output/bruggen_out/{wkt_id}')
+        results = main_distances(wkt, 'pointcloud', laz_dir = config['output_pat'] + f'{wkt_id}')
 
         values_list =  [
             results['model_2018_1'].point,
@@ -128,15 +156,17 @@ def main():
 
         value_string = prepare_sql_string(values_list)
 
-        insert_query = f'INSERT INTO pc_poc.results_pointcloud \
+        insert_query = f'INSERT INTO {schema}.{out_table} \
             VALUES ({wkt_id}, {value_string}, ST_GeomFromText(\'{wkt}\'))'
         leda.execute_query(insert_query)
 
 
 if __name__ == '__main__':
+    with open('config.yaml', 'rt') as f:
+        config = yaml.safe_load(f)
 
     # Ransac parameters
-    N_PLANES = 3
+    N_PLANES = 2
     MIN_PTS = 100
     MAX_DIST = 0.1
     MAX_ITERATIONS = 5000

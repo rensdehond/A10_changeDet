@@ -1,0 +1,11 @@
+schema: pc_poc
+table: bruggen
+host: leda.geodan.nl 
+dbname: VU
+user: 
+password: 
+port: 5432
+out_table: bruggen_out
+path_2018: '/var/data/rws/data/2018/entwined/ept.json'
+path_2019: '/var/data/rws/data/2019/amsterdam_entwined/ept.json'
+output_path: '/var/data/rws/data/output/bruggen_out/'

@@ -13,20 +13,15 @@ class Database:
 
     """
 
-    def __init__(self, db):
+    def __init__(self, db,  host='', dbname='', user='', password='', port=5432):
         self.database_name = db
-        if db.lower() not in ('metis', 'etl_02', 'etl_03', 'vu', 'localhost'):
-            logging.error('database name unknown \n')
-            host = input('host: \n')
-            user = input('user: \n')
-            password = input('password: \n')
-            database_name = input('database name: \n')
-            port = int(input('port: \n'))
 
-            self.connect(host,database_name,user,password,port)
-
-        else:
+        if db.lower() in ('metis', 'etl_02', 'etl_03', 'vu', 'localhost'):
             eval('self.connect_{}()'.format(db.lower()))
+           
+        else:
+            assert '' not in (host, database_name, user, password, port), 'no default database and empty argument found.'
+            self.connect(host,dbname,user,password,port)
 
 
     def connect(self, host, dbname, user, password, port=5432):
@@ -40,14 +35,6 @@ class Database:
         except psycopg2.OperationalError as e:
             logging.error('Unable to connect: {}'.format(e))
             sys.exit(1)
-
-
-    def connect_vu(self):
-        host = "leda.geodan.nl"
-        dbname = "VU"
-        user = "postgres"
-        password = "postgres"
-        self.connect(host, dbname, user, password)
 
     def execute_query(self, query, query_parameters=None):
         """
