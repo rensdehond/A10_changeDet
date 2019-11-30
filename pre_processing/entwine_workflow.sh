@@ -14,7 +14,7 @@ mkdir /var/data/rws/data/2018/filtered_las/
 mkdir /var/data/rws/data/2019/filtered_las/
 for i in /var/data/rws/data/2019/amsterdam/* ; do
 	if [ ! -f $(echo $i | sed s/amsterdam/filtered_las/) ]; then
-		pdal pipeline normalize_pipeline.json normalize_pipeline.json \
+		pdal pipeline cast_type_pipeline.json cast_type_pipeline.json \
 			--readers.las.filename=$i \
 			--writers.las.filename=$(echo $i | sed s/amsterdam/filtered_las/)
 	fi
