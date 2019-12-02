@@ -12,7 +12,7 @@ This repository contains the method for the detation of differences 'drive throu
 ## What does it do?
 this process wil loop through each of the polygons in `input table`. 
 ### For each polygon the process will:
-1.  Find the points within the polygon for each of the years 2018 and 2019 (given the points related to the paths `path_2018` and `path_2019`) \
+1.  Find the points within the polygon for each of the years 2018 and 2019 (given the points related to the paths `path_2018` and `path_2019`) 
 ### For each year the process will:
     1.  Estimate two planes per polygon; one for the bottom (the road) and the top (the ceiling).
     2.  Calculate the difference in height between the years.

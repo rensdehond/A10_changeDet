@@ -40,8 +40,18 @@ def main_distances(wkt, method = 'ransac', laz_dir = None):
         '2019': config['path_2018']
     }
 
-    xmin, ymin, xmax, ymax = shapely.wkt.loads(wkt).bounds
-    bounds = f'([{xmin}, {xmax}], [{ymin}, {ymax}])'
+    if shapely.wkt.loads(wkt).geom_type == 'Polygon':
+        xmin, ymin, xmax, ymax = shapely.wkt.loads(wkt).bounds
+        bounds = f'([{xmin}, {xmax}], [{ymin}, {ymax}])'
+
+    elif shapely.wkt.loads(wkt).geom_type == 'Point':
+        polygon = shapely.wkt.loads(wkt).buffer(0.7)
+        wkt = polygon.wkt
+
+        xmin, ymin, xmax, ymax = shapely.wkt.loads(wkt).bounds
+        bounds = f'([{xmin}, {xmax}], [{ymin}, {ymax}])'
+
+
 
     pc18 = get_points(paths['2018'], bounds, wkt)
     print(f'loaded pc 2018')
@@ -121,7 +131,7 @@ def main():
     out_table = config['out_table']
 
     # database connection and query
-    leda = Database(
+    database = Database(
             'VU',  
             host=config['host'], 
             dbname=config['dbname'], 
@@ -130,8 +140,8 @@ def main():
             port=config['port']
         )
 
-    query = f'SELECT id, ST_AsText(geom) wkt FROM {schema}.{table} where id in (1,2,3,4)'
-    result = leda.execute_query(query)[0]
+    query = f'SELECT id, ST_AsText(geom) wkt FROM {schema}.{table}'
+    result = database.execute_query(query)[0]
 
     for dictionary in result:
         wkt_id = dictionary['id']
@@ -157,8 +167,8 @@ def main():
         value_string = prepare_sql_string(values_list)
 
         insert_query = f'INSERT INTO {schema}.{out_table} \
-            VALUES ({wkt_id}, {value_string}, ST_GeomFromText(\'{wkt}\'))'
-        leda.execute_query(insert_query)
+            VALUES ({wkt_id}, {value_string}, ST_GeomFromText(\'{wkt}\'), {RUN})'
+        database.execute_query(insert_query)
 
 
 if __name__ == '__main__':
@@ -167,11 +177,11 @@ if __name__ == '__main__':
 
     # Ransac parameters
     N_PLANES = 2
-    MIN_PTS = 100
+    MIN_PTS = 50
     MAX_DIST = 0.1
     MAX_ITERATIONS = 5000
 
     # Pointcloud method parameters
     PERCENTAGE = 0.05
-
-    main()
+    for RUN in range(5):
+        main()
