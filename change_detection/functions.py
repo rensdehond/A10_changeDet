@@ -381,8 +381,8 @@ def find_distances_pcs(planes, relevant_ids, fraction=0.05):
     top = relevant_ids[0]
     bottom = relevant_ids[1]
 
-    top_z = np.percentile(planes[planes.cid == top]['z'], 100 - percentage)
-    bottom_z = np.percentile(planes[planes.cid == bottom]['z'], percentage)
+    top_z = np.percentile(planes[planes.cid == top]['z'], percentage)
+    bottom_z = np.percentile(planes[planes.cid == bottom]['z'], 100 - percentage)
 
     distance = top_z - bottom_z
 
