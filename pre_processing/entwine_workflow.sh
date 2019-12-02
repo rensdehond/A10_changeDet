@@ -4,7 +4,7 @@ mkdir $DATA_PATH/2018/filtered_las/
 
 for i in $DATA_PATH/2018/las_processor_bundled_out/* ; do
 	if [ ! -f $(echo $i | sed s/las_processor_bundled_out/filtered_las/) ]; then
-		pdal pipeline normalize_pipeline.json normalize_pipeline.json \
+		pdal pipeline cast_type_pipeline.json cast_type_pipeline.json \
 		       	--readers.las.filename=$i \
 	        	--writers.las.filename=$(echo $i | sed s/las_processor_bundled_out/filtered_las/)
 	fi
